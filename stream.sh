@@ -4,5 +4,11 @@ set -e
 
 while true
 do
-ffmpeg -stream_loop -1 -re -i ok.mp4 -stream_loop -1 -re -i http://stream.zeno.fm/v4wf5ezpxrhvv -vcodec libx264 -pix_fmt yuvj420p -maxrate 2048k -preset ultrafast -r 12 -framerate 1 -g 50 -crf 51 -c:a aac -b:a 128k -ar 44100 -strict experimental -video_track_timescale 100 -b:v 500k -f flv  rtmp://a.rtmp.youtube.com/live2/$YOUTUBE_KEY
+  ffmpeg -loglevel info -y -re \
+    -f mp4 -loop 1 -i ok.png \
+    -f concat -safe 0 -i <(for f in http://stream.zeno.fm/v4wf5ezpxrhvv;) | shuf) \
+    -c:v libx264 -preset veryfast -b:v 3000k -maxrate 3000k -bufsize 6000k \
+    -framerate 25 -video_size 1280x720 -vf "format=yuv420p" -g 50 -shortest -strict experimental \
+    -c:a aac -b:a 128k -ar 44100 \
+    -f flv rtmp://a.rtmp.youtube.com/live2/$YOUTUBE_KEY
 done
